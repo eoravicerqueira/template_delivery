@@ -388,15 +388,18 @@ button {
 
 .cart-items {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   flex: 1;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .cart-item {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 14px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
   border-radius: 20px;
   background: #f8fafc;
 }
@@ -404,7 +407,7 @@ button {
 .cart-item-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .cart-item-title {
@@ -425,10 +428,12 @@ button {
   align-items: center;
   gap: 8px;
   border-radius: 999px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   background: white;
   border: 1px solid #d1d5db;
+  width: fit-content;
 }
+
 
 .quantity-control button {
   border: none;
