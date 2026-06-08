@@ -1,0 +1,15 @@
+{
+  "name": "template_delivery",
+  "version": "1.0.0",
+  "description": "Local delivery web app with server-side restaurant configuration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.4"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

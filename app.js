@@ -76,17 +76,20 @@ const cartSubtotal = document.getElementById("cartSubtotal");
 const cartDeliveryFee = document.getElementById("cartDeliveryFee");
 const cartTotal = document.getElementById("cartTotal");
 const cartCount = document.getElementById("cartCount");
+const deliveryCepInput = document.getElementById("deliveryCepInput");
+const deliveryInfo = document.getElementById("deliveryInfo");
 const checkoutBtn = document.getElementById("checkoutBtn");
 const openCartBtn = document.getElementById("openCartBtn");
 const closeCartBtn = document.getElementById("closeCartBtn");
 const cartPanel = document.getElementById("cartPanel");
 const toast = document.getElementById("toast");
 const searchInput = document.getElementById("searchInput");
-const deliveryCepInput = document.getElementById("deliveryCepInput");
-const deliveryInfo = document.getElementById("deliveryInfo");
 
-const companyCep = "77018540";
-const kmPrice = 1;
+const restaurantConfig = {
+  restaurantName: "Delivery App",
+  companyCep: "77018540",
+  deliveryRate: 1,
+};
 let companyLocation = null;
 let currentDeliveryDistance = 5;
 let currentDeliveryFee = 5;
@@ -103,6 +106,21 @@ function formatPrice(value) {
 
 function saveCart() {
   localStorage.setItem("deliveryCart", JSON.stringify(cart));
+}
+
+async function loadRestaurantConfig() {
+  try {
+    const response = await fetch("/api/config");
+    if (!response.ok) {
+      throw new Error("Não foi possível carregar a configuração");
+    }
+    const config = await response.json();
+    restaurantConfig.companyCep = config.companyCep || restaurantConfig.companyCep;
+    restaurantConfig.deliveryRate = Number(config.deliveryRate) || restaurantConfig.deliveryRate;
+    restaurantConfig.restaurantName = config.restaurantName || restaurantConfig.restaurantName;
+  } catch (error) {
+    console.warn("Falha ao carregar configuração local, usando padrão.", error);
+  }
 }
 
 function showToast(message) {
@@ -163,40 +181,51 @@ async function getRouteDistanceKm(origin, destination) {
 }
 
 function getDeliveryFee(distanceKm) {
-  return Math.max(kmPrice, Math.round(distanceKm * kmPrice));
+  return Math.max(restaurantConfig.deliveryRate, Math.round(distanceKm * restaurantConfig.deliveryRate));
 }
 
 async function initializeCompanyLocation() {
   if (companyLocation) return companyLocation;
   try {
-    companyLocation = await getCoordinatesFromCep(companyCep);
+    companyLocation = await getCoordinatesFromCep(restaurantConfig.companyCep);
   } catch (error) {
     companyLocation = { lat: -10.2409, lon: -48.3248 };
   }
   return companyLocation;
 }
 
+function validateCepField(input) {
+  const digits = input.value.trim().replace(/\D/g, "");
+  const valid = digits.length === 8;
+  input.classList.toggle("invalid", !valid && digits.length > 0);
+  return valid ? digits : null;
+}
+
 async function updateDeliverySummary(subtotal) {
-  const cep = deliveryCepInput.value.trim().replace(/\D/g, "");
-  currentDestinationCep = cep;
+  const destinationCep = validateCepField(deliveryCepInput);
+  currentDestinationCep = deliveryCepInput.value.trim().replace(/\D/g, "");
   await initializeCompanyLocation();
 
+  const deliveryRateText = `R$ ${restaurantConfig.deliveryRate.toFixed(2).replace(".", ",")} / km`;
   let distance = 5;
   let fee = getDeliveryFee(distance);
-  let infoText = `Origem: CEP ${companyCep}`;
+  let infoText = `Origem: CEP ${restaurantConfig.companyCep} · Taxa: ${deliveryRateText}`;
 
-  if (cep.length === 8) {
+  if (destinationCep) {
     try {
-      const destinationLocation = await getCoordinatesFromCep(cep);
+      const destinationLocation = await getCoordinatesFromCep(destinationCep);
       distance = await getRouteDistanceKm(companyLocation, destinationLocation);
       fee = getDeliveryFee(distance);
-      infoText = `Origem: CEP ${companyCep} · Destino: CEP ${cep} · Distância: ${distance} km`;
+      infoText = `Origem: CEP ${restaurantConfig.companyCep} · Destino: CEP ${destinationCep} · Distância: ${distance} km · ${deliveryRateText}`;
+      deliveryCepInput.classList.remove("invalid");
     } catch (error) {
-      infoText = `Origem: CEP ${companyCep} · CEP de entrega inválido ou indisponível`;
+      infoText = `Origem: CEP ${restaurantConfig.companyCep} · CEP de entrega inválido ou indisponível · ${deliveryRateText}`;
       showToast(error.message);
+      deliveryCepInput.classList.add("invalid");
     }
   } else {
-    infoText = `Origem: CEP ${companyCep} · Informe o CEP de entrega para cálculo real`;
+    infoText = `Origem: CEP ${restaurantConfig.companyCep} · Informe o CEP de entrega para cálculo real · ${deliveryRateText}`;
+    deliveryCepInput.classList.remove("invalid");
   }
 
   currentDeliveryDistance = distance;
@@ -392,12 +421,17 @@ searchInput.addEventListener("input", (event) => {
   renderProducts();
 });
 
-deliveryCepInput.addEventListener("input", () => renderCart());
+deliveryCepInput.addEventListener("input", () => {
+  deliveryCepInput.classList.remove("invalid");
+  renderCart();
+});
 
 openCartBtn.addEventListener("click", () => toggleCart(true));
 closeCartBtn.addEventListener("click", () => toggleCart(false));
 checkoutBtn.addEventListener("click", handleCheckout);
 
-renderCategoryFilters();
-renderProducts();
-renderCart();
+loadRestaurantConfig().finally(() => {
+  renderCategoryFilters();
+  renderProducts();
+  renderCart();
+});

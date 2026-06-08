@@ -404,12 +404,25 @@ button {
   font-weight: 700;
 }
 
-.delivery-cep-block input {
+.delivery-cep-block input,
+.delivery-cep-block select {
   width: 100%;
   border: 1px solid #d1d5db;
   border-radius: 14px;
   padding: 12px 14px;
   background: white;
+}
+
+.delivery-cep-block input:focus,
+.delivery-cep-block select:focus {
+  outline: none;
+  border-color: #4338ca;
+  box-shadow: 0 0 0 4px rgba(67, 56, 202, 0.1);
+}
+
+.delivery-cep-block .invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
 }
 
 .delivery-cep-block small {
