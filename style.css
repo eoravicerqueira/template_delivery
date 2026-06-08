@@ -359,6 +359,9 @@ button {
   border: 1px solid #e5e7eb;
   height: fit-content;
   min-height: 420px;
+  position: sticky;
+  top: 24px;
+  align-self: start;
 }
 
 .cart-header {
