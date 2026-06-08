@@ -280,6 +280,9 @@ function renderProducts() {
     .map(
       (product) => `
       <article class="product-card">
+        <div class="product-image">
+          ${product.image ? `<img src="${product.image}" alt="${product.name}" />` : `<div class="product-placeholder">Imagem do produto</div>`}
+        </div>
         <div class="product-top">
           <h3>${product.name}</h3>
           <span>${formatPrice(product.price)}</span>
