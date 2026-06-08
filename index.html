@@ -1,11 +1,73 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delivery App</title>
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="app.js"></script>
 </head>
 <body>
-    
+    <div class="app-shell">
+        <header class="site-header">
+            <div class="brand">
+                <span class="brand-mark">D</span>
+                <div>
+                    <strong>Delivery App</strong>
+                    <small>Cardápio e pedido online</small>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="cart-button" id="openCartBtn">
+                    Carrinho <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <section class="menu-panel">
+                <div class="intro-card">
+                    <div>
+                        <p class="eyebrow">Peça com facilidade</p>
+                        <h1>Delivery digital para sua lanchonete, pizzaria ou restaurante.</h1>
+                        <p class="hero-copy">
+                            Veja o cardápio, escolha seus produtos, gerencie o carrinho e finalize o pedido.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <div class="search-box">
+                        <input id="searchInput" type="search" placeholder="Buscar no cardápio..." />
+                    </div>
+                    <div class="filter-group" id="categoryFilters"></div>
+                </div>
+
+                <div class="product-grid" id="productGrid"></div>
+            </section>
+
+            <aside class="cart-panel" id="cartPanel">
+                <div class="cart-header">
+                    <div>
+                        <p class="eyebrow">Seu pedido</p>
+                        <h2>Resumo do carrinho</h2>
+                    </div>
+                    <button class="icon-button" id="closeCartBtn" aria-label="Fechar carrinho">×</button>
+                </div>
+
+                <div class="cart-items" id="cartItems"></div>
+
+                <div class="cart-footer">
+                    <div class="summary-row">
+                        <span>Total</span>
+                        <strong id="cartTotal">R$ 0,00</strong>
+                    </div>
+                    <button class="btn-primary" id="checkoutBtn" disabled>Finalizar pedido</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
 </body>
 </html>
