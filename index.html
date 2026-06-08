@@ -55,12 +55,28 @@
                     <button class="icon-button" id="closeCartBtn" aria-label="Fechar carrinho">×</button>
                 </div>
 
+                <div class="delivery-cep-block">
+                    <label for="deliveryCepInput">CEP de entrega</label>
+                    <input id="deliveryCepInput" type="text" placeholder="Ex: 77018540" maxlength="8" />
+                    <small id="deliveryInfo">Origem: CEP 77018540 (empresa)</small>
+                </div>
+
                 <div class="cart-items" id="cartItems"></div>
 
                 <div class="cart-footer">
-                    <div class="summary-row">
-                        <span>Total</span>
-                        <strong id="cartTotal">R$ 0,00</strong>
+                    <div class="summary-group">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <strong id="cartSubtotal">R$ 0,00</strong>
+                        </div>
+                        <div class="summary-row summary-fee">
+                            <span>Taxa de entrega</span>
+                            <strong id="cartDeliveryFee">R$ 0,00</strong>
+                        </div>
+                        <div class="summary-row summary-total">
+                            <span>Total</span>
+                            <strong id="cartTotal">R$ 0,00</strong>
+                        </div>
                     </div>
                     <button class="btn-primary" id="checkoutBtn" disabled>Finalizar pedido</button>
                 </div>

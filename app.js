@@ -72,6 +72,8 @@ let searchTerm = "";
 const productGrid = document.getElementById("productGrid");
 const categoryFilters = document.getElementById("categoryFilters");
 const cartItemsContainer = document.getElementById("cartItems");
+const cartSubtotal = document.getElementById("cartSubtotal");
+const cartDeliveryFee = document.getElementById("cartDeliveryFee");
 const cartTotal = document.getElementById("cartTotal");
 const cartCount = document.getElementById("cartCount");
 const checkoutBtn = document.getElementById("checkoutBtn");
@@ -80,6 +82,15 @@ const closeCartBtn = document.getElementById("closeCartBtn");
 const cartPanel = document.getElementById("cartPanel");
 const toast = document.getElementById("toast");
 const searchInput = document.getElementById("searchInput");
+const deliveryCepInput = document.getElementById("deliveryCepInput");
+const deliveryInfo = document.getElementById("deliveryInfo");
+
+const companyCep = "77018540";
+const kmPrice = 1;
+let companyLocation = null;
+let currentDeliveryDistance = 5;
+let currentDeliveryFee = 5;
+let currentDestinationCep = "";
 
 const categories = ["all", ...new Set(products.map((product) => product.category))];
 
@@ -101,6 +112,98 @@ function showToast(message) {
   toast.timeoutId = window.setTimeout(() => {
     toast.classList.remove("show");
   }, 1800);
+}
+
+async function getCoordinatesFromCep(cep) {
+  const digits = cep.replace(/\D/g, "");
+  if (digits.length !== 8) {
+    throw new Error("CEP inválido");
+  }
+
+  const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&postalcode=${encodeURIComponent(
+    digits
+  )}&limit=1&addressdetails=1`;
+  const response = await fetch(url, {
+    headers: {
+      "Accept-Language": "pt-BR",
+      "User-Agent": "delivery-app-template/1.0",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Falha ao buscar coordenadas");
+  }
+
+  const results = await response.json();
+  if (!results.length) {
+    throw new Error("CEP não encontrado");
+  }
+
+  return {
+    lat: Number(results[0].lat),
+    lon: Number(results[0].lon),
+  };
+}
+
+async function getRouteDistanceKm(origin, destination) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${origin.lon},${origin.lat};${destination.lon},${destination.lat}?overview=false&alternatives=false&steps=false`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Falha ao calcular rota");
+  }
+
+  const data = await response.json();
+  if (!data.routes || !data.routes.length) {
+    throw new Error("Rota não encontrada");
+  }
+
+  const distanceMeters = data.routes[0].distance;
+  return Math.max(1, Math.round(distanceMeters / 1000));
+}
+
+function getDeliveryFee(distanceKm) {
+  return Math.max(kmPrice, Math.round(distanceKm * kmPrice));
+}
+
+async function initializeCompanyLocation() {
+  if (companyLocation) return companyLocation;
+  try {
+    companyLocation = await getCoordinatesFromCep(companyCep);
+  } catch (error) {
+    companyLocation = { lat: -10.2409, lon: -48.3248 };
+  }
+  return companyLocation;
+}
+
+async function updateDeliverySummary(subtotal) {
+  const cep = deliveryCepInput.value.trim().replace(/\D/g, "");
+  currentDestinationCep = cep;
+  await initializeCompanyLocation();
+
+  let distance = 5;
+  let fee = getDeliveryFee(distance);
+  let infoText = `Origem: CEP ${companyCep}`;
+
+  if (cep.length === 8) {
+    try {
+      const destinationLocation = await getCoordinatesFromCep(cep);
+      distance = await getRouteDistanceKm(companyLocation, destinationLocation);
+      fee = getDeliveryFee(distance);
+      infoText = `Origem: CEP ${companyCep} · Destino: CEP ${cep} · Distância: ${distance} km`;
+    } catch (error) {
+      infoText = `Origem: CEP ${companyCep} · CEP de entrega inválido ou indisponível`;
+      showToast(error.message);
+    }
+  } else {
+    infoText = `Origem: CEP ${companyCep} · Informe o CEP de entrega para cálculo real`;
+  }
+
+  currentDeliveryDistance = distance;
+  currentDeliveryFee = fee;
+  cartDeliveryFee.textContent = formatPrice(fee);
+  deliveryInfo.textContent = infoText;
+  cartTotal.textContent = formatPrice(subtotal + fee);
 }
 
 function renderCategoryFilters() {
@@ -182,6 +285,8 @@ function renderCart() {
       </div>
     `;
     checkoutBtn.disabled = true;
+    cartSubtotal.textContent = formatPrice(0);
+    cartDeliveryFee.textContent = formatPrice(0);
     cartTotal.textContent = formatPrice(0);
     cartCount.textContent = "0";
     return;
@@ -240,9 +345,10 @@ function renderCart() {
     return sum + product.price * cart[productId];
   }, 0);
 
-  cartTotal.textContent = formatPrice(total);
+  cartSubtotal.textContent = formatPrice(total);
   cartCount.textContent = productIds.reduce((sum, productId) => sum + cart[productId], 0);
   checkoutBtn.disabled = false;
+  updateDeliverySummary(total);
 }
 
 function addToCart(productId) {
@@ -285,6 +391,8 @@ searchInput.addEventListener("input", (event) => {
   searchTerm = event.target.value;
   renderProducts();
 });
+
+deliveryCepInput.addEventListener("input", () => renderCart());
 
 openCartBtn.addEventListener("click", () => toggleCart(true));
 closeCartBtn.addEventListener("click", () => toggleCart(false));

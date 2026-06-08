@@ -390,13 +390,53 @@ button {
   gap: 16px;
 }
 
+.delivery-cep-block {
+  display: grid;
+  gap: 10px;
+  padding: 18px 18px 10px;
+  border-radius: 24px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.delivery-cep-block label {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.delivery-cep-block input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: white;
+}
+
+.delivery-cep-block small {
+  color: #6b7280;
+}
+
+.summary-group {
+  display: grid;
+  gap: 10px;
+}
+
 .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  border-radius: 20px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.summary-row.summary-fee {
+  background: #fff7ed;
+}
+
+.summary-row.summary-total {
   background: #eef2ff;
+  font-weight: 700;
 }
 
 .btn-primary {
