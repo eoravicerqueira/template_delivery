@@ -285,10 +285,6 @@ function renderProducts() {
           <span>${formatPrice(product.price)}</span>
         </div>
         <p class="product-description">${product.description}</p>
-        <div class="product-meta">
-          <span class="tag">${product.category}</span>
-          <span class="tag">${product.tag}</span>
-        </div>
         <button class="add-button" data-id="${product.id}">Adicionar ao carrinho</button>
       </article>
     `
