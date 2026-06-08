@@ -78,6 +78,11 @@ const cartTotal = document.getElementById("cartTotal");
 const cartCount = document.getElementById("cartCount");
 const deliveryCepInput = document.getElementById("deliveryCepInput");
 const deliveryInfo = document.getElementById("deliveryInfo");
+const restaurantNameEl = document.getElementById("restaurantName");
+const restaurantDescriptionEl = document.getElementById("restaurantDescription");
+const restaurantLocationEl = document.getElementById("restaurantLocation");
+const restaurantHoursEl = document.getElementById("restaurantHours");
+const openStatusEl = document.getElementById("openStatus");
 const checkoutBtn = document.getElementById("checkoutBtn");
 const openCartBtn = document.getElementById("openCartBtn");
 const closeCartBtn = document.getElementById("closeCartBtn");
@@ -89,6 +94,13 @@ const restaurantConfig = {
   restaurantName: "Delivery App",
   companyCep: "77018540",
   deliveryRate: 1,
+  location: "Palmas, TO",
+  description: "Cardápio e pedido online",
+  schedule: {
+    open: "08:00",
+    close: "18:00",
+    closedDays: ["Monday"],
+  },
 };
 let companyLocation = null;
 let currentDeliveryDistance = 5;
@@ -118,6 +130,9 @@ async function loadRestaurantConfig() {
     restaurantConfig.companyCep = config.companyCep || restaurantConfig.companyCep;
     restaurantConfig.deliveryRate = Number(config.deliveryRate) || restaurantConfig.deliveryRate;
     restaurantConfig.restaurantName = config.restaurantName || restaurantConfig.restaurantName;
+    restaurantConfig.location = config.location || restaurantConfig.location;
+    restaurantConfig.description = config.description || restaurantConfig.description;
+    restaurantConfig.schedule = config.schedule || restaurantConfig.schedule;
   } catch (error) {
     console.warn("Falha ao carregar configuração local, usando padrão.", error);
   }
@@ -130,6 +145,54 @@ function showToast(message) {
   toast.timeoutId = window.setTimeout(() => {
     toast.classList.remove("show");
   }, 1800);
+}
+
+function getDayName(date) {
+  return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][date.getDay()];
+}
+
+function isRestaurantOpen(schedule) {
+  const now = new Date();
+  const dayName = getDayName(now);
+  if (schedule.closedDays.includes(dayName)) {
+    return false;
+  }
+
+  const [openHour, openMinute] = schedule.open.split(":").map(Number);
+  const [closeHour, closeMinute] = schedule.close.split(":").map(Number);
+  const openTime = new Date(now);
+  openTime.setHours(openHour, openMinute, 0, 0);
+  const closeTime = new Date(now);
+  closeTime.setHours(closeHour, closeMinute, 0, 0);
+
+  return now >= openTime && now < closeTime;
+}
+
+function getScheduleLabel(schedule) {
+  const dayMap = {
+    Monday: "Seg",
+    Tuesday: "Ter",
+    Wednesday: "Qua",
+    Thursday: "Qui",
+    Friday: "Sex",
+    Saturday: "Sáb",
+    Sunday: "Dom",
+  };
+  const closedLabels = schedule.closedDays.map((day) => dayMap[day] || day).join(", ");
+  const hours = `${Number(schedule.open.split(":")[0])}h-${Number(schedule.close.split(":")[0])}h`;
+  return closedLabels ? `${hours} · Fechado: ${closedLabels}` : hours;
+}
+
+function renderRestaurantInfo() {
+  restaurantNameEl.textContent = restaurantConfig.restaurantName;
+  restaurantDescriptionEl.textContent = restaurantConfig.description;
+  restaurantLocationEl.textContent = restaurantConfig.location;
+  restaurantHoursEl.textContent = getScheduleLabel(restaurantConfig.schedule);
+
+  const open = isRestaurantOpen(restaurantConfig.schedule);
+  openStatusEl.textContent = open ? "Aberto" : "Fechado";
+  openStatusEl.classList.toggle("open", open);
+  openStatusEl.classList.toggle("closed", !open);
 }
 
 async function getCoordinatesFromCep(cep) {
@@ -430,7 +493,9 @@ closeCartBtn.addEventListener("click", () => toggleCart(false));
 checkoutBtn.addEventListener("click", handleCheckout);
 
 loadRestaurantConfig().finally(() => {
+  renderRestaurantInfo();
   renderCategoryFilters();
   renderProducts();
   renderCart();
+  setInterval(renderRestaurantInfo, 60000);
 });

@@ -9,6 +9,13 @@ const defaultConfig = {
   restaurantName: "Delivery App",
   companyCep: "77018540",
   deliveryRate: 1,
+  location: "Palmas, TO",
+  description: "Cardápio e pedido online",
+  schedule: {
+    open: "08:00",
+    close: "18:00",
+    closedDays: ["Monday"],
+  },
 };
 
 app.use(express.json());
@@ -30,6 +37,9 @@ async function saveConfig(config) {
     restaurantName: config.restaurantName || defaultConfig.restaurantName,
     companyCep: String(config.companyCep || defaultConfig.companyCep).replace(/\D/g, ""),
     deliveryRate: Number(config.deliveryRate) || defaultConfig.deliveryRate,
+    location: config.location || defaultConfig.location,
+    description: config.description || defaultConfig.description,
+    schedule: config.schedule || defaultConfig.schedule,
   };
   await fs.writeFile(configPath, JSON.stringify(cleanConfig, null, 2), "utf8");
   return cleanConfig;

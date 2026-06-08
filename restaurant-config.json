@@ -1,5 +1,12 @@
 {
   "restaurantName": "Delivery App",
   "companyCep": "77018540",
-  "deliveryRate": 1
+  "deliveryRate": 1,
+  "location": "Palmas, TO",
+  "description": "Cardápio e pedido online",
+  "schedule": {
+    "open": "08:00",
+    "close": "18:00",
+    "closedDays": ["Monday"]
+  }
 }

@@ -74,13 +74,55 @@ button {
   font-size: 1.25rem;
 }
 
+.brand-details {
+  display: grid;
+  gap: 6px;
+}
+
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .brand strong {
   display: block;
   font-size: 1.15rem;
 }
 
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-tag.open {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-tag.closed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .brand small {
   color: #6b7280;
+}
+
+.restaurant-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: #6b7280;
+  font-size: 0.95rem;
 }
 
 .header-actions {
